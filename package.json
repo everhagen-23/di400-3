@@ -1,0 +1,32 @@
+{
+  "name": "di400-3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "eleventy --serve",
+  "build": "eleventy",
+  "deploy": "gh-pages -d _site"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/everhagen-23/di400-3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/everhagen-23/di400-3/issues"
+  },
+  "homepage": "https://github.com/everhagen-23/di400-3#readme",
+  "dependencies": {
+    "@11ty/eleventy": "^3.1.7"
+  }
+
+
+  
+}
