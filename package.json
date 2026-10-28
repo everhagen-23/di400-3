@@ -3,13 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-
-
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "eleventy --serve",
-  "build": "eleventy",
-  "deploy": "gh-pages -d _site"
+    "start": "eleventy --serve",
+    "build": "eleventy",
+    "deploy": "gh-pages -d _site"
   },
   "repository": {
     "type": "git",
@@ -25,8 +23,8 @@
   "homepage": "https://github.com/everhagen-23/di400-3#readme",
   "dependencies": {
     "@11ty/eleventy": "^3.1.7"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
-
-
-  
 }
