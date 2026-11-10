@@ -1,0 +1,163 @@
+body { background-color: #d2ffd9;
+    font-family: arial, helvetica, sans-serif;
+    padding:3em;
+    line-height:1.3em;
+    color: rgb(16, 16, 24);
+}
+
+.foot ul {
+    display: inline;
+    text-decoration: none;
+}
+
+nav {
+    background-color: #f5ffd6;
+    font-family: "louvette-pixel", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 2em;
+    padding:-1em;
+    margin:2px;
+    position: relative;
+    z-index: 100;
+    color: red;
+
+}
+
+h1 {
+    padding: 1em 1em 1em 0;
+    color:#000066;
+    font-family: "unibody-8-new", sans-serif;
+font-weight: 700;
+font-style: normal;
+}
+
+
+div.flex {display: flex;
+    justify-content:space-evenly;
+    width:90vw;
+    background-color:lemonchiffon;
+}
+
+div.flex img {
+    max-width:200px;
+    width:80%;}
+
+div#footer {
+    width:80%;
+    margin:auto;
+    display:flex;
+    justify-content: space-evenly;
+    font-size: smaller;
+}
+
+img#newt {
+    max-width:100px;
+    width:80%;}
+
+/*
+2026-10-28 ebb: Since I'm using is-lands now, I don't need this line to keep the gallery images
+hidden until interaction.
+    section.gallery {display:none;}
+*/
+
+table { border-collapse: collapse; width: 100%;
+border: 2px solid #BF9E7D;
+/*border: 0*/
+}
+
+tr {border-collapse: collapse; border: 0}
+
+th
+{ border-collapse: collapse;
+border: 1px solid  #000066;
+background-color: #bad7e6 /*#7E967E*/;
+padding: 1px;
+vertical-align:top;
+}
+
+td
+{ border-collapse: collapse;
+border: 1px solid #000066;
+padding: 7px;
+vertical-align:top;
+}
+
+th:nth-child(1), td:nth-child(1) {
+width:12%; text-align:center;
+}
+
+th:nth-child(2), td:nth-child(2) {
+width:34%;
+}
+
+th:nth-child(3), td:nth-child(3) {
+width:34%;
+}
+th:nth-child(4), td:nth-child(4) {
+width:10%;
+}
+th:nth-child(5), td:nth-child(5) {
+width:10%;
+}
+/* td:nth-child(1) {background-color:/* #bad7e6*/
+/*td:nth-child(2), td:nth-child(3) {background-color:#e1ebf0/\*#C5D3D3*\/;}*/
+
+tr:nth-child(odd) {
+  background-color: #e3dcee;
+}
+tr:nth-child(even) {
+  background-color: #e3e9d8;
+}
+
+section.counterFlex {
+    display: flex;
+    justify-content:space-between;
+    width:20%;
+}
+div.counter { background-color: #bad7e6;
+    border: 3px solid #BF9E7D;
+    padding:1em;
+    }
+
+button.add {
+    background-color:#e3e9d8;
+    font-weight:bold; }
+
+button.subtract {
+    background-color: #e3dcee;
+    font-weight:bold;}
+
+
+section.pushButton {width:30%; margin:auto; display:flex; justify-content: space-around}
+.pushButton button {
+    background-color:lavender;
+    font-size:larger;
+    accent-color:red;
+    padding:2em;
+    border-radius: 30%;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+.pushButton button:hover {
+    background-color:hotpink;
+
+}
+div#scrollText {
+    position:absolute;
+    top: 20vh; /* Does this center vertically in window? */
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-size: 2em;
+    font-weight: bolder;
+    color:#005500;
+    animation: scrollText 20s linear infinite;
+    padding-left: 50vw; /* Start off-screen to the right */
+    z-index: 1; /* Ensure text is on top of the canvas */
+    pointer-events: none; /* Allow mouse interaction with the canvas */
+}
+div#scrollText span.textmessage {
+    text-shadow: 4px 4px darkred;
+    border-radius:20%;
+    background-color:rgba(197,153,151,.8);
+
+}

@@ -1,6 +1,6 @@
 ---
-title: EmmaTest
+title: Home
 layout: base.njk
 ---
-**testing testing is anyone out there**
---
+
+project intro

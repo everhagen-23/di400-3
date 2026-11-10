@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport"
+           content="width=device-width,
+           user-scalable=no,
+           initial-scale=1.0,
+           maximum-scale=1.0,
+           minimum-scale=1.0">
+     <meta http-equiv="X-UA-Compatible"
+           content="ie=edge">
+     <title>Island Architecture Orientation</title>
+     <link rel="stylesheet" href="css/style.css">
+     <script type="module" src="js/is-land.js"></script>
+     <!-- ebb: I needed to remove a leading slash from the js
+     as well as the css line association lines for is-lands to properly deploy to gh-pages. -->
+</head>
+<body>
+ <head>
+<link rel="stylesheet" href="https://use.typekit.net/crc6hge.css">
+
+</head>
+<nav>
+    <a href="index.html">Home</a> | <a href="game.html">Game</a> | <a href="guide.html">Writeup</a> | <a href="edutools.html">EduTools</a>
+</nav>
+
+
+ <h1>Island Architecture Orientation</h1>
+ <h2></h2>
+
+    <!-- ebb: I needed to add the "templateEngineOverride: md" in the fences
+because this page explains some liquid tags quoted in markdown, and without this override, Liquid fills the tag in before the markdown is parsed, so the backticks would display empty! So this should stop 11ty from filling in the tags we want you to see.
+ -->
+<p><em>An orientation for the part of this course where we build our site in 11ty and add interactivity with <code>&lt;is-land&gt;</code> and petite-vue.</em></p>
+<h2>Two ways to build a website</h2>
+<p>There are, broadly, two ways people build sites today that have interactive parts.</p>
+<p><strong>Approach 1: the whole site is an app.</strong> You write the entire page in JavaScript — every heading, every image, every paragraph of body text — as a tree of components. When someone visits, the browser downloads a bundle of JavaScript, runs it, and that JavaScript <em>builds</em> the page from scratch, entirely in the browser. State (the data that can change — a counter, a form value, what's currently selected) lives in that JavaScript and the page re-draws itself whenever it changes. This is how frameworks like React, Vue, or Svelte are most commonly used — you may have seen this called a &quot;single-page app,&quot; or &quot;SPA.&quot;</p>
+<p><strong>Approach 2: the site is a website, and a few parts of it wake up.</strong> Most of a page (body text, images, navigation, a gallery) never changes after it's loaded, so there is no reason to route it through JavaScript at all. It's rendered ahead of time as plain HTML. (That's what 11ty does — it builds full HTML pages from your templates and markdown, before anyone visits.) Only the <em>specific pieces</em> that actually need to remember something and react to input (like a filter control, a live form, or a Three.js scene) are wrapped in a small reserved &quot;pocket&quot; of JavaScript that &quot;wakes up&quot; independently. Those pockets are called <strong>islands</strong>. Everything <em>outside</em> an island is just HTML, the way the web has worked since the 1990s: no JavaScript is required to read the rest of the site, so that content is served without depending on the JS portions at all!</p>
+<p>That's the whole idea. We are learning <strong>approach 2</strong> with island architecture in this unit!</p>
+<h2>Why the distinction matters, not just technically</h2>
+<p>These two approaches definitely differ in performance: islands are typically faster and lighter, so you're not shipping a big JavaScript application just to display a paragraph of text. But these approaches <em>also</em> reflect two different assumptions about what a <strong>page</strong> is.</p>
+<p>Approach 1 treats a page as an <em>application</em>: something assembled at runtime, out of interchangeable, remixable parts. That's a good design strategy, and it's why React-style thinking dominates a lot of professional software: apps like Gmail or Figma really are best understood as programs, not documents. <span class="smaller">For those curious: Figma's user interface is built with React, and Gmail has its own Google-based JavaScript framework: we can say that they are &quot;React-style&quot; without calling them React.</span></p>
+<p>Approach 2 treats a page as a <em>document</em> that occasionally has small, deliberate pockets of behavior added to it. That's closer to how the web itself was originally imagined, and it fits a design portfolio, a gallery, or a project site, where most of what you're making is content meant to be read, viewed, and navigated, and only a few interactions need to be <strong>stateful</strong> (which means those interactions can be stored in memory). You're not defaulting into &quot;everything is an app&quot;; you're choosing, piece by piece, where interactivity actually earns its keep.</p>
+<p>Neither approach is &quot;correct&quot; because they're suited to different things. Knowing about both means <em>you get to choose deliberately</em> rather than by default, which is really what we're trying to teach you beyond adapting our starter code syntax and file structure.</p>
+<h2>How an island actually works</h2>
+<p>Two small tools do the work: the island structure and the JavaScript that's referenced inside it.</p>
+<p><strong><code>&lt;is-land&gt;</code></strong> decides <em>when</em> a region of the page wakes up. It doesn't know or care what JavaScript runs inside it. It's just a container with a timer.</p>
+<pre><code class="language-html">&lt;is-land on:visible&gt;
+
+  &lt;div id=&quot;counter&quot; v-scope=&quot;{ count: 0 }&quot;&gt;
+    &lt;p&gt;Count: &lt;span v-text=&quot;count&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+    &lt;button @click=&quot;count++&quot;&gt;Add one&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;template data-island&gt;
+    &lt;script type=&quot;module&quot;&gt;
+      import { createApp } from './js/petite-vue.js'
+      createApp().mount('#counter')
+    &lt;/script&gt;
+  &lt;/template&gt;
+
+&lt;/is-land&gt;
+</code></pre>
+<p>Nothing inside <code>&lt;template data-island&gt;</code> runs until the loading condition fires. Here are some properties you can set for an is-land:</p>
+<ul>
+<li><code>on:visible</code> : Nothing happens until a user scrolls this into view.</li>
+<li><code>on:idle</code> : Wait until the browser isn't busy with anything more urgent.</li>
+<li><code>on:interaction</code> : Wait until the user clicks or taps something.</li>
+<li><code>on:media</code> : Wait for a screen-size or device condition to be true.</li>
+</ul>
+<p><strong>petite-vue</strong> is what actually runs once an island wakes up. It's a very small library (only about 6 KB), and it lets us add state and reactivity directly onto existing HTML without a build step or a compiler. <strong><code>v-scope</code> marks the region controlled by petite-vue.</strong> Inside that region:</p>
+<ul>
+<li><code>{{ count }}</code> displays a value, and updates automatically whenever it changes</li>
+<li><code>@click=&quot;count++&quot;</code> runs code in response to an event</li>
+<li>the values in <code>v-scope=&quot;{ ... }&quot;</code> are the <em>state</em> — the data this piece of the page remembers</li>
+</ul>
+<p>This is the same underlying idea as &quot;state&quot; in any interactive framework: it's a value the page remembers and reacts to, just written directly onto the HTML file (in this is-land) instead of being generated by JavaScript.</p>
+<h2>Set up islands on your site!</h2>
+<p>Let's begin with two new installations.</p>
+<h3>1. Install is-land and petite-vue</h3>
+<p>At your shell on your 11ty repository, install is-land and petite-vue together with a single npm command:</p>
+<pre><code>npm install @11ty/is-land petite-vue
+</code></pre>
+<p><code>is-land</code> decides <em>when</em> an island wakes up. <code>petite-vue</code> makes it react to clicks and typing. Both are added to your <code>package.json</code> automatically.</p>
+<h3>2. Copy the scripts into your built site with addPassthroughCopy</h3>
+<p>In <code>.eleventy.js</code>, next to your other <code>addPassthroughCopy</code> lines, add:</p>
+<pre><code class="language-js">eleventyConfig.addPassthroughCopy({
+  &quot;node_modules/@11ty/is-land/is-land.js&quot;: &quot;js/is-land.js&quot;,
+  &quot;node_modules/petite-vue/dist/petite-vue.es.js&quot;: &quot;js/petite-vue.js&quot;
+});
+</code></pre>
+<p>This copies each file out of <code>node_modules</code> into <code>_site/js/</code>, where a browser can load it.</p>
+<h3>3. Load <code>is-land</code> on your pages</h3>
+<p>If you want these to run with pages that use your base.njk layout, we need to add the
+is-land's javascript to them.</p>
+<p>Open <code>_includes/base.njk</code> and add this line inside <code>&lt;head&gt;</code>:</p>
+<pre><code class="language-html">&lt;script type=&quot;module&quot; src=&quot;js/is-land.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>When your pages reach for <code>base.njk</code>, those pages now know what <code>&lt;is-land&gt;</code> means.
+(If you skip this step, your islands will never work!)</p>
+<h2>Exercise 0: Make your first island (a counter)</h2>
+<p>The markup goes in the page like normal HTML. Only the script waits inside the <code>&lt;template data-island&gt;</code>.</p>
+<pre><code class="language-html">&lt;is-land on:visible&gt;
+
+  &lt;div id=&quot;counter&quot; v-scope=&quot;{ count: 0 }&quot;&gt;
+    &lt;p&gt;Count: &lt;span v-text=&quot;count&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+    &lt;button @click=&quot;count++&quot;&gt;Add one&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;template data-island&gt;
+    &lt;script type=&quot;module&quot;&gt;
+      import { createApp } from './js/petite-vue.js'
+      createApp().mount('#counter')
+    &lt;/script&gt;
+  &lt;/template&gt;
+
+&lt;/is-land&gt;
+</code></pre>
+<ul>
+<li>The <code>id</code> in <code>mount('#counter')</code> has to match the <code>id</code> on the element with <code>v-scope</code>.</li>
+<li>Use <code>v-text=&quot;count&quot;</code> instead of <code>{{ count }}</code>. 11ty’s template languages (Liquid in your markdown files and Nunjucks in your .njk files) will also read double curly braces and will try to fill them in before the browser sees them.</li>
+</ul>
+<h3>Troubleshooting</h3>
+<table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>404</code> for <code>is-land.js</code> or <code>petite-vue.js</code> in the browser console</td>
+<td>Did you save <code>.eleventy.js</code>? Restart the server.</td>
+</tr>
+<tr>
+<td>The page loads but the button does nothing</td>
+<td>Is the <code>&lt;script&gt;</code> line in <code>base.njk</code>? Does the <code>mount('#...')</code> id match?</td>
+</tr>
+<tr>
+<td>Blank or <code>undefined</code> text where a value should be</td>
+<td>Use <code>v-text</code>, not double curly braces.</td>
+</tr>
+<tr>
+<td>Works on localhost, broken on GitHub Pages</td>
+<td>Look for a leading slash (<code>/js/...</code>) in your paths and remove it. See the path rules below.</td>
+</tr>
+<tr>
+<td>Console says it can't resolve <code>js/petite-vue.js</code></td>
+<td>An <code>import</code> path must start with <code>./</code>. Use <code>./js/petite-vue.js</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Open your browser's developer tools (the Console and Network tabs) first. They usually tell you which file the browser couldn't find.</p>
+<h4>Wait...which path style should I use?</h4>
+<p>All of your file paths are <em>relative</em>: they point to a folder next to the page you're writing in. There are three rules.</p>
+<ul>
+<li><strong>In HTML attributes</strong> (<code>&lt;script src&gt;</code>, <code>&lt;link href&gt;</code>, <code>&lt;img src&gt;</code>), write <code>js/file.js</code>. Writing <code>./js/file.js</code> also works and means exactly the same thing. We use the shorter form in this course.</li>
+<li><strong>In a JavaScript <code>import</code></strong>, you <em>must</em> start with <code>./</code>, as in <code>import { createApp } from './js/petite-vue.js'</code>. Without it, the browser reads <code>js/petite-vue.js</code> as the name of a package and refuses to load it.</li>
+<li><strong>Never start a path with <code>/</code></strong> on a GitHub Pages project site. Your site lives at <code>username.github.io/repo-name/</code>, and a leading slash points to <code>username.github.io/</code>, outside your site.</li>
+</ul>
+<p>Both relative forms count from the page you're on. If a page ever lives inside a subfolder, you'll need <code>../</code> to climb back up (<code>../js/file.js</code>).</p>
+<h2>Reusable pieces in petite-vue</h2>
+<p>If you want the same interactive behavior in more than one place on a page, you can wrap it in a plain JavaScript function that returns an object of data and behavior:</p>
+<pre><code class="language-html">&lt;is-land on:visible&gt;
+
+  &lt;div id=&quot;counters&quot;&gt;
+    &lt;div v-scope=&quot;Counter({ initialCount: 5 })&quot;&gt;
+      &lt;p&gt;Count: &lt;span v-text=&quot;count&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+      &lt;button @click=&quot;increment&quot;&gt;+&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div v-scope=&quot;Counter({ initialCount: 20 })&quot;&gt;
+      &lt;p&gt;Count: &lt;span v-text=&quot;count&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+      &lt;button @click=&quot;increment&quot;&gt;+&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;template data-island&gt;
+    &lt;script type=&quot;module&quot;&gt;
+      import { createApp } from './js/petite-vue.js'
+
+      function Counter(props) {
+        return {
+          count: props.initialCount,
+          increment() { this.count++ }
+        }
+      }
+
+      createApp({ Counter }).mount('#counters')
+    &lt;/script&gt;
+  &lt;/template&gt;
+
+&lt;/is-land&gt;
+</code></pre>
+<p>So here, the Counter function is just written once. Inside the island you hand to <code>createApp({ Counter })</code>, you can use it as many times as you like, and each use keeps its own independent state. To use Counter in a different island, that new island’s script has to hand it to createApp too. The Counter function is petite-vue's version of a &quot;component&quot;: much tinier than a full JS framework component but the same core modular idea of <strong>packaging up behavior you can re-use</strong>.</p>
+<p>One related point: Separate islands don’t share <em>state</em> (or memory) even when they share the function. Two counters never affect each other unless you add some shared memory store between them (something we'll explore later on).</p>
+<h2>Using Three.js in your 11ty site (without Vite)</h2>
+<p>In the last unit you built your Three.js scene with Vite. For this unit, 11ty is the one tool that builds your site. Vite is a development server <em>and</em> a bundler, and running it next to 11ty's own server would make two tools fight over the same job. So we keep only the part we need from Vite, the <strong>bundler</strong>, and use a small standalone one called <strong>esbuild</strong>.</p>
+<h3>What a bundler does, and why we need one</h3>
+<p>Your Three.js code starts with a line like this:</p>
+<pre><code class="language-js">import * as THREE from 'three'
+</code></pre>
+<p>A browser can't resolve <code>'three'</code>. A path with no <code>./</code> in front is read as the name of a <em>package</em>, and the browser has no <code>node_modules</code> folder to look in. (This is the same rule that makes <code>import … from 'js/file.js'</code> fail.) A bundler follows your <code>import</code> lines, gathers the code they point to, and writes <strong>one file</strong> that the browser can load, with Three.js already inside it.</p>
+<h3>Setup Three.js in 11ty using esbuild</h3>
+<p><strong>1. Install two packages on your 11ty repo.</strong></p>
+<pre><code>npm install three
+npm install --save-dev esbuild
+</code></pre>
+<p>(These will be added to your package.json)</p>
+<p><strong>2. Keep your scene code in one entry file.</strong></p>
+<p>Save it at <code>_src/threeScene.js</code> so it sits alongside your markdown files. If your scene code from the Vite unit only used <code>import</code> lines like the one above, it needs no changes.</p>
+<p><strong>3. Add the build step to <code>.eleventy.js</code>.</strong></p>
+<p>Put the <code>require</code> line at the very top of the file.</p>
+<pre><code class="language-js">const esbuild = require(&quot;esbuild&quot;);
+</code></pre>
+<p>Then set the next block inside <code>module.exports = function (eleventyConfig) { … }</code>.</p>
+<pre><code class="language-js">// Bundle Three.js before every 11ty build
+eleventyConfig.on(&quot;eleventy.before&quot;, async () =&gt; {
+  await esbuild.build({
+    entryPoints: [&quot;_src/threeScene.js&quot;],
+    bundle: true,
+    minify: true,
+    format: &quot;esm&quot;,
+    outdir: &quot;_site/js&quot;,
+    sourcemap: true,
+  });
+});
+
+// Re-run the build when the scene file changes during npm run start
+eleventyConfig.addWatchTarget(&quot;./_src/threeScene.js&quot;);
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>entryPoints</code></td>
+<td>The file to start from. esbuild follows every <code>import</code> out of it.</td>
+</tr>
+<tr>
+<td><code>bundle: true</code></td>
+<td>Combine everything into a single file.</td>
+</tr>
+<tr>
+<td><code>minify: true</code></td>
+<td>Shrink the file! This is very important because Three.js is large and you want to lighten its load for your visitors!</td>
+</tr>
+<tr>
+<td><code>format: &quot;esm&quot;</code></td>
+<td>Write a modern module, which <code>&lt;script type=&quot;module&quot;&gt;</code> expects.</td>
+</tr>
+<tr>
+<td><code>outdir</code></td>
+<td>Where the finished file lands: <code>_site/js/threeScene.js</code>.</td>
+</tr>
+<tr>
+<td><code>sourcemap: true</code></td>
+<td>Lets your browser's dev tools show your original code in error messages.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. Put the scene in an island on your page.</strong></p>
+<p>Use the path to the <em>built</em> file in <code>_site/js</code>. Your page doesn't use your source file.</p>
+<pre><code class="language-html">&lt;is-land on:visible&gt;
+  &lt;template data-island&gt;
+    &lt;div id=&quot;scene-container&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;module&quot; src=&quot;js/threeScene.js&quot;&gt;&lt;/script&gt;
+  &lt;/template&gt;
+&lt;/is-land&gt;
+</code></pre>
+<p><strong>5. Keep textures and models in a folder that 11ty copies.</strong></p>
+<p>In <code>.eleventy.js</code>:</p>
+<pre><code class="language-js">eleventyConfig.addPassthroughCopy(&quot;./_src/threed-images/&quot;);
+</code></pre>
+<p>Then refer to them with a relative path in your scene code, such as <code>threed-images/texture.jpg</code>.</p>
+<p><strong>6. Build and publish as usual.</strong> <code>npm run start</code> bundles your scene each time it builds, and your deploy step publishes the built <code>_site</code> folder. Your <code>node_modules</code> folder never goes online.</p>
+<h3>Things Vite did that esbuild here does not</h3>
+<p><strong>Important</strong>: If your three.js scene used <em>any</em> of these, you need to make some small changes:</p>
+<ul>
+<li><code>import.meta.env</code> is a Vite feature. Replace it with a plain value.</li>
+<li>Importing an image or model as a module (<code>import tex from './tex.jpg'</code>) won't work. Load it by path instead, as in step 5.</li>
+<li>Vite's <code>public/</code> folder doesn't exist here. Use <code>_src/threed-images/</code> or another passthrough folder.</li>
+</ul>
+<p>The watch target only covers the one file you list. If you split your scene into several files, add a line for each, or watch the folder that holds them.</p>
+<h3>Troubleshooting 11ty / Three.js issues</h3>
+<table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build error: <code>Could not resolve &quot;three&quot;</code></td>
+<td>Run <code>npm install three</code> in your project folder.</td>
+</tr>
+<tr>
+<td><code>404</code> for <code>threeScene.js</code> in the browser console</td>
+<td>Is the entry file at <code>_src/threeScene.js</code>? Does the page say <code>src=&quot;js/threeScene.js&quot;</code>?</td>
+</tr>
+<tr>
+<td>You edited the scene but the page shows the old one</td>
+<td>Save the file. Check that the watch target names the file you edited. Restart the server.</td>
+</tr>
+<tr>
+<td>Works on localhost, broken on GitHub Pages</td>
+<td>Remove any leading slash from your paths. See the path rules above.</td>
+</tr>
+</tbody>
+</table>
+<h2>Exercise 1: Turn your Three.js sketch into an island</h2>
+<p>Since you already have a working Three.js scene from the last unit, building an island for it won't require learning any new syntax. This is now purely about <em>timing</em> and incorporating your three.js model into your site, and you're learning how to integrate a three.js scene into 11ty using an is-land.</p>
+<h3>Make a home for your pages / Did you make a nav bar yet?</h3>
+<p>First a little housekeeping for your 11ty site:</p>
+<ul>
+<li>Create a markdown page to host your three.js scene alongside some other content. Set it up with fences and a layout, (probably your base.njk)</li>
+<li>You should definitely make yourself a nice navigation menu.
+<ul>
+<li>If you haven't done so already, in _src, make a layouts/ folder to nest inside your _includes folder:</li>
+</ul>
+</li>
+</ul>
+<pre><code>_src
+  └── _includes
+        └── layouts
+</code></pre>
+<p>* Inside layouts, you can create .html files that can store your nav bar and a footer, a sidebar, whatever else you want to be able to tuck into base.njk.
+* Modify your base.njk to include your navbar (if you haven't already), and remember to keep updating that nav bar as you develop your site. Take a look at the files in my model 11ty site as a guide:
+* <a href="https://github.com/newtfire/11ty-model/tree/main/_src/_includes">https://github.com/newtfire/11ty-model/tree/main/_src/_includes</a></p>
+<h3>Setting up your new page to host your Three.js scene</h3>
+<p>Take your existing scene-setup code and wrap it in an is-land like so, adjusting to your directory structure where this will build in your 11ty site:</p>
+<pre><code class="language-html">&lt;is-land on:visible&gt;
+  &lt;template data-island&gt;
+    &lt;div id=&quot;scene-container&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;module&quot; src=&quot;js/threeScene.js&quot;&gt;&lt;/script&gt;
+  &lt;/template&gt;
+&lt;/is-land&gt;
+</code></pre>
+<p>Previously on your original Three.js project repo: your scene initialized the instant the page loaded, whether or not anyone had scrolled to it.</p>
+<p>Now (when you get this running in an is-land in your 11ty site): Three.js only initializes when it's actually in the viewport. Nothing about your Three.js code really changes except this part: <em>when</em> it runs on a page in your 11ty site. This is a simple way to get a sense of what an &quot;island&quot; means before adding more petite-vue syntax on top of it.</p>
+<h2>Next Steps</h2>
+<p>Looking ahead, the next island we'll make introduces <code>v-scope</code> and real state:
+You'll set up a value that changes, and a page that reacts to it, in a completely separate island from your static content.</p>
+<h2>My Demo Island Counters</h2>
+<p>If all is well, these counters will be working!</p>
+<is-land on:visible>
+<section class="counterFlex">
+  <div class="counter" id="counter1" v-scope="{ count: 5 }">
+    <p>Count: <span v-text="count"></span></p>
+    <button class="add" @click="count+=3">Add three!</button>
+  </div>
+  <div class="counter" id="counter2" v-scope="{ count: 13 }">
+    <p>Count: <span v-text="count"></span></p>
+    <button class="subtract" @click="count-=3">Subtract three!</button>
+  </div>
+</section>
+  <template data-island>
+    <script type="module">
+      import { createApp } from './js/petite-vue.js'
+      createApp().mount('#counter1')
+      createApp().mount('#counter2')
+    </script>
+  </template>
+</is-land>
+
+
+ <hr/>
+<div id="footer">
+<ul class="foot">
+    <li><a href="https://github.com/everhagen-23/di400-3">GitHub</a></li>
+    <li><a href="">Contact Me</a></li>
+    <li><a href="index.html">Home</a></li>
+</ul>
+</div>
+
+
+</body>
+</html>
