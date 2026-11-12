@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+
      <meta charset="UTF-8">
      <meta name="viewport"
            content="width=device-width,
@@ -12,9 +13,8 @@
            content="ie=edge">
      <title>Home</title>
      <link rel="stylesheet" href="css/style.css">
+     <script type="module" src="./js/is-land.js"></script>
      <script type="module" src="js/is-land.js"></script>
-     <!-- ebb: I needed to remove a leading slash from the js
-     as well as the css line association lines for is-lands to properly deploy to gh-pages. -->
 </head>
 <body>
  <head>
@@ -29,8 +29,24 @@
  <h1>Home</h1>
  <h2></h2>
 
-    <p>project intro</p>
-
+    <is-land on:visible>
+  <div id="counter" v-scope="{ count: 0 }">
+    <p>Count: <span v-text="count"></span></p>
+    <button @click="count++">Add one</button>
+  </div>
+  <template data-island>
+    <script type="module">
+      import { createApp } from './js/petite-vue.js'
+      createApp().mount('#counter')
+    </script>
+  </template>
+</is-land>
+<is-land on:visible>
+  <template data-island>
+    <div id="scene-container"></div>
+    <script type="module" src="js/threeScene.js"></script>
+  </template>
+</is-land>
 
  <hr/>
 <div id="footer">
