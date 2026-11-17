@@ -1,0 +1,38 @@
+{
+  "gamebox": [
+    {
+      "file": "WITWICS.jpeg",
+      "caption": "WITWICS",
+      "alt": ""
+    },
+    {
+      "file": "simcity.jpeg",
+      "caption": "simcity",
+      "alt": ""
+    }
+  ],
+  "gamecaps": [
+    {
+      "file": "WITWICS.png",
+      "caption": "WITWICS",
+      "alt": ""
+    },
+    {
+      "file": "simcity.jpeg",
+      "caption": "simcity",
+      "alt": ""
+    }
+  ],
+  "gameplat": [
+    {
+      "file": "itch.png",
+      "caption": "itch",
+      "alt": ""
+    },
+    {
+      "file": "steam.jpeg",
+      "caption": "steam",
+      "alt": ""
+    }
+  ]
+}
